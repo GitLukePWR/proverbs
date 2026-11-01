@@ -1,9 +1,10 @@
-import { ArrowLeft, ArrowUpRight, FileQuestion, Trash2 } from 'lucide-react';
+import { ArrowUpRight, FileQuestion, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { services } from '../app/services';
 import { getProverb } from '../content/library';
 import { getTranslation } from '../content/translations';
+import { BackLink } from '../components/BackLink';
 import { EmptyState } from '../components/EmptyState';
 import { ReflectionJournal } from '../components/ReflectionJournal';
 import { MeaningSection } from '../components/StudySections';
@@ -61,9 +62,7 @@ export function JournalEntryScreen() {
 
   return (
     <div className="mx-auto max-w-3xl animate-rise">
-      <Link to="/journal" className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted hover:text-forest">
-        <ArrowLeft size={16} aria-hidden /> Journal
-      </Link>
+      <BackLink fallback="/journal" label="Journal" />
 
       <header className="mb-6">
         <p className="eyebrow mb-1.5">{entry.dailyDate ? 'Daily reflection' : 'Reflection from Explore'}</p>
@@ -85,7 +84,7 @@ export function JournalEntryScreen() {
             {live && (
               <Link
                 to={entry.dailyDate ? `/day/${entry.dailyDate}` : `/proverb/${live.id}`}
-                className="inline-flex items-center gap-1 font-medium text-forest hover:underline"
+                className="inline-flex min-h-11 items-center gap-1 font-medium text-forest hover:underline"
               >
                 Open full study <ArrowUpRight size={14} aria-hidden />
               </Link>
@@ -113,7 +112,7 @@ export function JournalEntryScreen() {
               </div>
             </div>
           ) : (
-            <button type="button" className="inline-flex items-center gap-2 text-sm text-clay hover:underline" onClick={() => setConfirming(true)}>
+            <button type="button" className="inline-flex min-h-11 items-center gap-2 text-sm text-clay hover:underline" onClick={() => setConfirming(true)}>
               <Trash2 size={15} aria-hidden /> Delete this entry
             </button>
           )}

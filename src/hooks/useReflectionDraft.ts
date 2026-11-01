@@ -7,6 +7,7 @@ import type { DateKey, JournalEntry, Proverb, PromptKey, ReflectionAnswers } fro
 export type SaveStatus = 'idle' | 'pending' | 'saved' | 'error';
 
 const AUTOSAVE_DELAY_MS = 600;
+const RETRY_DELAY_MS = 5000;
 
 interface Options {
   proverb: Proverb;
@@ -34,6 +35,11 @@ export function useReflectionDraft({ proverb, entry, dailyDate }: Options) {
   const draftRef = useRef({ answers, notes });
   const dirtyRef = useRef(false);
   const timerRef = useRef<number | undefined>(undefined);
+  const failedRef = useRef(false);
+  // Latest context in a ref, so `persist` stays stable across parent re-renders
+  // (otherwise the flush-on-leave listeners would be torn down and re-added).
+  const contextRef = useRef({ proverb, dailyDate });
+  contextRef.current = { proverb, dailyDate };
 
   const persist = useCallback(() => {
     window.clearTimeout(timerRef.current);
@@ -55,17 +61,22 @@ export function useReflectionDraft({ proverb, entry, dailyDate }: Options) {
       const now = new Date();
       const next: JournalEntry = existing
         ? { ...existing, answers: { ...draft.answers }, notes: draft.notes, updatedAt: now.toISOString() }
-        : createEntry({ proverb, dailyDate, writtenOn: toDateKey(now), now, answers: draft.answers, notes: draft.notes });
+        : createEntry({ ...contextRef.current, writtenOn: toDateKey(now), now, answers: draft.answers, notes: draft.notes });
       services.journal.save(next);
       entryIdRef.current = next.id;
       setSavedAt(next.updatedAt);
       setCreatedAt(next.createdAt);
+      failedRef.current = false;
       setStatus('saved');
     } catch {
-      dirtyRef.current = true; // keep the draft so a later edit can retry
+      // Keep the draft on screen and keep trying; never pretend it saved.
+      dirtyRef.current = true;
+      failedRef.current = true;
       setStatus('error');
+      timerRef.current = window.setTimeout(() => persistRef.current(), RETRY_DELAY_MS);
     }
-  }, [proverb, dailyDate]);
+  }, []);
+  const persistRef = useRef(persist);
 
   const schedule = useCallback(() => {
     dirtyRef.current = true;
@@ -95,14 +106,21 @@ export function useReflectionDraft({ proverb, entry, dailyDate }: Options) {
     [schedule],
   );
 
-  // Flush on unmount and when the page is hidden or closed.
+  // Flush on unmount and when the page is hidden or closed. If saving is
+  // failing, ask the browser to warn before the tab is closed.
   useEffect(() => {
     const flush = () => persist();
     const onVisibility = () => document.visibilityState === 'hidden' && flush();
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      flush();
+      if (failedRef.current && dirtyRef.current) e.preventDefault();
+    };
     window.addEventListener('pagehide', flush);
+    window.addEventListener('beforeunload', onBeforeUnload);
     document.addEventListener('visibilitychange', onVisibility);
     return () => {
       window.removeEventListener('pagehide', flush);
+      window.removeEventListener('beforeunload', onBeforeUnload);
       document.removeEventListener('visibilitychange', onVisibility);
       flush();
     };

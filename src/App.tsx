@@ -1,4 +1,4 @@
-import { HashRouter, Route, Routes } from 'react-router';
+import { Navigate, RouterProvider, createHashRouter } from 'react-router';
 import { AppShell } from './components/AppShell';
 import { ToastProvider } from './components/Toast';
 import { ChapterScreen } from './screens/ChapterScreen';
@@ -7,34 +7,40 @@ import { JournalEntryScreen } from './screens/JournalEntryScreen';
 import { JournalScreen } from './screens/JournalScreen';
 import { NotFoundScreen } from './screens/NotFoundScreen';
 import { ProverbScreen } from './screens/ProverbScreen';
-import { SavedScreen } from './screens/SavedScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { TodayScreen } from './screens/TodayScreen';
+import { WisdomScreen } from './screens/WisdomScreen';
 
 /**
  * Hash-based routing (`/#/journal`) works on GitHub Pages without server
- * rewrites and inside a Capacitor WebView without any configuration.
+ * rewrites and inside a Capacitor WebView without configuration. A data
+ * router is used so scroll position is restored on Back/Forward.
  * Journal text never appears in a URL.
  */
+const router = createHashRouter([
+  {
+    element: <AppShell />,
+    children: [
+      { index: true, element: <TodayScreen /> },
+      { path: 'day/:date', element: <TodayScreen /> },
+      { path: 'journal', element: <JournalScreen /> },
+      { path: 'journal/:id', element: <JournalEntryScreen /> },
+      { path: 'explore', element: <ExploreScreen /> },
+      { path: 'explore/chapter/:chapter', element: <ChapterScreen /> },
+      { path: 'proverb/:id', element: <ProverbScreen /> },
+      { path: 'wisdom/:id', element: <WisdomScreen /> },
+      // Saved now lives inside Explore; keep the old address working.
+      { path: 'saved', element: <Navigate to="/explore?tab=saved" replace /> },
+      { path: 'settings', element: <SettingsScreen /> },
+      { path: '*', element: <NotFoundScreen /> },
+    ],
+  },
+]);
+
 export function App() {
   return (
-    <HashRouter>
-      <ToastProvider>
-        <Routes>
-          <Route element={<AppShell />}>
-            <Route index element={<TodayScreen />} />
-            <Route path="day/:date" element={<TodayScreen />} />
-            <Route path="journal" element={<JournalScreen />} />
-            <Route path="journal/:id" element={<JournalEntryScreen />} />
-            <Route path="explore" element={<ExploreScreen />} />
-            <Route path="explore/chapter/:chapter" element={<ChapterScreen />} />
-            <Route path="proverb/:id" element={<ProverbScreen />} />
-            <Route path="saved" element={<SavedScreen />} />
-            <Route path="settings" element={<SettingsScreen />} />
-            <Route path="*" element={<NotFoundScreen />} />
-          </Route>
-        </Routes>
-      </ToastProvider>
-    </HashRouter>
+    <ToastProvider>
+      <RouterProvider router={router} />
+    </ToastProvider>
   );
 }

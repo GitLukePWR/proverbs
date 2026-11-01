@@ -12,6 +12,7 @@ export function ShareMenu({ proverb }: { proverb: Proverb }) {
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const firstItemRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -19,7 +20,12 @@ export function ShareMenu({ proverb }: { proverb: Proverb }) {
     const onDown = (e: PointerEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
     document.addEventListener('pointerdown', onDown);
     document.addEventListener('keydown', onKey);
     return () => {
@@ -41,6 +47,7 @@ export function ShareMenu({ proverb }: { proverb: Proverb }) {
   return (
     <div ref={rootRef} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         className="icon-btn"
         aria-label={`Share ${proverb.reference}`}
@@ -55,6 +62,18 @@ export function ShareMenu({ proverb }: { proverb: Proverb }) {
         <div
           id={menuId}
           role="menu"
+          aria-label={`Share ${proverb.reference}`}
+          onKeyDown={(e) => {
+            // Standard menu keys: arrows move, Tab leaves and closes.
+            const items = [...(e.currentTarget.querySelectorAll('[role=menuitem]') as NodeListOf<HTMLElement>)];
+            const i = items.indexOf(document.activeElement as HTMLElement);
+            const next = e.key === 'ArrowDown' ? (i + 1) % items.length : e.key === 'ArrowUp' ? (i - 1 + items.length) % items.length : e.key === 'Home' ? 0 : e.key === 'End' ? items.length - 1 : -1;
+            if (next >= 0) {
+              e.preventDefault();
+              items[next]?.focus();
+            }
+            if (e.key === 'Tab') setOpen(false);
+          }}
           className="animate-rise absolute right-0 top-11 z-20 w-60 overflow-hidden rounded-2xl border border-line bg-paper p-1.5 shadow-[0_16px_40px_-20px_rgba(29,39,33,0.35)]"
         >
           <button ref={firstItemRef} role="menuitem" type="button" onClick={() => share(false)} className="w-full rounded-xl px-3 py-2.5 text-left text-sm text-ink hover:bg-sage-wash focus-visible:bg-sage-wash">

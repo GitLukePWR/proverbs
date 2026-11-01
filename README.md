@@ -11,8 +11,7 @@ It is a static React app: no backend, no accounts, no analytics, no environment 
 - **Today**: a deterministic daily proverb, its meaning, a practice, tailored reflection prompts and an autosaving journal. Step back through previous days to revisit their proverbs and entries.
 - **Wisdom in Action**: a short interactive scenario on the Today screen. Read a realistic situation, choose one of three plausible responses, then see how it might play out, compare the alternatives, read the linked Scripture and an explanation of the connection, and optionally take a follow-up question into your journal. There are 20 curated scenarios; progress is saved and can be revisited from Explore.
 - **Journal**: every reflection, newest first, with search, month/proverb filters, editing and deletion (with confirmation).
-- **Explore**: 45 guided studies filterable by topic, search by reference (`3:5`, `prov 16`) or keyword, and the full text of all 31 chapters.
-- **Saved**: bookmark any study.
+- **Explore**: four sections behind a sticky segmented control, each one tap away. **Studies** has search by reference (`3:5`, `prov 16`) or keyword, plus topic filters. **Chapters** is a grid of all 31 chapters, each readable in full. **Scenarios** lists all Wisdom in Action scenarios. **Saved** holds bookmarks. The section, search and filter live in the URL, so Back returns you to exactly where you were.
 - **Share**: Web Share API with clipboard fallback. Shares the Scripture text, plus the explanation if you choose. It never includes journal text.
 - **Export**: download your journal as JSON (complete) or Markdown (readable).
 - **Dark mode**: Automatic (follows the device's light/dark setting, the default), Light or Dark, chosen in Settings. A saved choice is applied before first paint, so there's no flash.
@@ -40,7 +39,7 @@ One-time setup: in the repository go to **Settings → Pages → Build and deplo
 How static hosting is handled:
 
 - `vite.config.ts` uses a **relative base (`./`)**, so the same build works under a project sub-path, at a domain root, or inside a native WebView. Set `BASE_PATH=/something/` at build time if you need an absolute base.
-- Routing uses **hash URLs** (`/#/journal`), so deep links and refreshes work without server rewrites or a `404.html` trick.
+- Routing uses **hash URLs** (`/#/journal`), so deep links and refreshes work without server rewrites or a `404.html` trick. It uses React Router's data router (`createHashRouter`) with `ScrollRestoration`: new screens open at the top and Back/Forward restores the previous scroll position.
 
 ## Architecture
 
@@ -65,6 +64,10 @@ Key decisions:
 - **Wisdom in Action** content lives in `content/scenarios.ts`, linked to studies by ID; Scripture is always resolved from the study library. `domain/scenarios.ts` picks the day's scenario: one linked to the day's proverb if available, otherwise one from the wider library (labelled as such), never the same scenario two days running. Options are shown in a fixed order per scenario that varies across the library, so the most considered response isn't always in the same place. Progress is a separate versioned document (`wize.scenarios`), so no migration of existing data was needed. "Reflect in your journal" starts the existing journal's *Reflect* answer with the follow-up question, only if that answer is empty.
 - **Theming**: every colour is a design token in `src/index.css`. Dark mode redefines those tokens under `prefers-color-scheme: dark` (Automatic) or `[data-theme]` (explicit choice), so components need no dark-specific classes. `platform/theme.ts` applies the preference and updates the browser's theme colour.
 - **Journal entries** store `proverbId`, the reference, and a snapshot of the Scripture text and prompts, so old entries stay meaningful if content changes.
+
+## Usability
+
+See [`docs/UX-AUDIT.md`](docs/UX-AUDIT.md) for the latest usability audit: findings by priority, what was changed, and before/after measurements.
 
 ## Data persistence & limitations
 

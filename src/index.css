@@ -10,9 +10,9 @@
   --color-forest: #23382c;
   --color-forest-soft: #34503f;
   --color-muted: #59665d;
-  --color-faint: #7d877f;
+  --color-faint: #5f6961; /* ≥4.5:1 on cream, paper and sage-wash */
   --color-sage: #8fa07c;
-  --color-sage-deep: #5d7150;
+  --color-sage-deep: #536747;
   --color-sage-wash: #e6eadb;
   --color-line: #e2dccd;
   --color-line-strong: #cfc7b4;
@@ -106,7 +106,7 @@
 
 /* Base button, declared as a utility so component classes can @apply it. */
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ease-calm disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ease-calm disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 @layer components {
@@ -142,13 +142,13 @@
     @apply btn bg-clay text-cream hover:bg-clay/85;
   }
   .icon-btn {
-    @apply inline-flex h-10 w-10 items-center justify-center rounded-full text-forest transition-colors duration-200 hover:bg-sage-wash;
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-full text-forest transition-colors duration-200 hover:bg-sage-wash;
   }
   .field {
     @apply w-full rounded-xl border border-line bg-paper px-4 py-3 text-ink placeholder:text-faint transition-colors focus:border-sage-deep focus:outline-none;
   }
   .chip {
-    @apply inline-flex items-center rounded-full border border-line px-3 py-1.5 text-sm text-muted transition-colors hover:border-line-strong hover:text-forest;
+    @apply inline-flex min-h-11 items-center rounded-full border border-line px-3.5 py-1.5 text-sm text-muted transition-colors hover:border-line-strong hover:text-forest;
   }
   .chip[aria-pressed='true'] {
     @apply border-forest bg-forest text-cream;

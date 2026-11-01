@@ -25,13 +25,14 @@ interface Props {
   prompts?: ReflectionPrompts;
   title?: string;
   prefill?: JournalPrefill | null;
+  anchorId?: string;
 }
 
 /**
  * Guided reflection: the three prompts, each with its own answer field, plus
  * free notes. Autosaves to the device. Remount (via `key`) to switch entries.
  */
-export function ReflectionJournal({ proverb, entry, dailyDate, prompts = proverb.prompts, title = 'Your Reflection', prefill }: Props) {
+export function ReflectionJournal({ proverb, entry, dailyDate, prompts = proverb.prompts, title = 'Your Reflection', prefill, anchorId }: Props) {
   const draft = useReflectionDraft({ proverb, entry, dailyDate });
   const baseId = useId();
   const toast = useToast();
@@ -61,7 +62,7 @@ export function ReflectionJournal({ proverb, entry, dailyDate, prompts = proverb
   }, [prefill?.nonce]);
 
   return (
-    <section ref={sectionRef} aria-labelledby={`${baseId}-title`} className="card scroll-mt-24 px-5 py-6 md:px-8 md:py-8">
+    <section ref={sectionRef} id={anchorId} aria-labelledby={`${baseId}-title`} className="card scroll-mt-24 px-5 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
         <div>
           <div className="flex items-center gap-2">

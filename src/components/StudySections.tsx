@@ -15,8 +15,8 @@ export function MeaningSection({ proverb }: { proverb: Proverb }) {
       <p className="prose-body mt-3 text-ink/90 text-pretty">{proverb.meaning}</p>
       <p className="mt-3 text-xs text-faint">A modern explanation written for Wize — interpretation, not Scripture.</p>
       {proverb.context && (
-        <details className="group mt-4 border-t border-line pt-3">
-          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-forest [&::-webkit-details-marker]:hidden">
+        <details className="group mt-4 border-t border-line pt-1">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-forest [&::-webkit-details-marker]:hidden">
             <ChevronDown size={16} className="transition-transform duration-300 group-open:rotate-180" aria-hidden />
             Background
           </summary>

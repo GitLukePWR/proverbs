@@ -6,7 +6,7 @@ export function Wordmark({ className = '' }: { className?: string }) {
     <Link
       to="/"
       aria-label="Wize — go to today"
-      className={`group inline-flex items-baseline font-serif text-[1.65rem] leading-none tracking-[-0.02em] text-forest ${className}`}
+      className={`group -mx-1 inline-flex min-h-11 items-center px-1 font-serif text-[1.65rem] leading-none tracking-[-0.02em] text-forest ${className}`}
     >
       <span className="italic font-medium" style={{ fontVariationSettings: "'opsz' 72" }}>
         W
@@ -16,7 +16,7 @@ export function Wordmark({ className = '' }: { className?: string }) {
       </span>
       <span
         aria-hidden
-        className="ml-[3px] inline-block h-[6px] w-[6px] translate-y-[-1px] rounded-full bg-sage transition-transform duration-500 ease-calm group-hover:scale-125"
+        className="ml-[3px] mt-[0.55em] inline-block h-[6px] w-[6px] self-start rounded-full bg-sage transition-transform duration-500 ease-calm group-hover:scale-125"
       />
     </Link>
   );

@@ -1,4 +1,4 @@
-import { BellOff, Download, HardDrive, Info, Monitor, Moon, Sun, ShieldCheck, Signpost, Trash2, TriangleAlert } from 'lucide-react';
+import { BellOff, BookOpen, Download, HardDrive, Info, Monitor, Moon, Sun, ShieldCheck, Signpost, Trash2, TriangleAlert } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { services, storageRecoveredFromError } from '../app/services';
 import { STUDY_COUNT } from '../content/library';
@@ -84,7 +84,7 @@ export function SettingsScreen() {
       )}
 
       <div className="space-y-5">
-        <Section title="Reading" icon={<Info size={18} aria-hidden />}>
+        <Section title="Reading & appearance" icon={<BookOpen size={18} aria-hidden />}>
           <fieldset>
             <legend className="mb-2 text-sm font-medium text-ink">Appearance</legend>
             <div className="flex flex-wrap gap-2">
@@ -165,7 +165,7 @@ export function SettingsScreen() {
             ) : (
               <button
                 type="button"
-                className="inline-flex items-center gap-2 text-sm text-clay hover:underline disabled:opacity-50 disabled:no-underline"
+                className="inline-flex min-h-11 items-center gap-2 text-sm text-clay hover:underline disabled:opacity-50 disabled:no-underline"
                 onClick={() => setConfirmDelete(true)}
                 disabled={entries.length === 0}
               >
@@ -197,7 +197,7 @@ export function SettingsScreen() {
           ) : (
             <button
               type="button"
-              className="inline-flex items-center gap-2 text-sm text-clay hover:underline disabled:opacity-50 disabled:no-underline"
+              className="inline-flex min-h-11 items-center gap-2 text-sm text-clay hover:underline disabled:opacity-50 disabled:no-underline"
               onClick={() => setConfirmReset(true)}
               disabled={explored === 0}
             >

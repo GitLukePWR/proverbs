@@ -1,4 +1,3 @@
-import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { JournalPrefill } from '../components/ReflectionJournal';
@@ -7,6 +6,7 @@ import { getScenario, scenariosForProverb } from '../content/scenarioLibrary';
 import { journalStarter } from '../domain/scenarios';
 import { scrollToElement } from '../platform/scroll';
 import { getProverb } from '../content/library';
+import { BackLink } from '../components/BackLink';
 import { EmptyState } from '../components/EmptyState';
 import { ProverbStudyView } from '../components/ProverbStudyView';
 import { useJournalEntries, usePreferences } from '../hooks/useStores';
@@ -36,7 +36,7 @@ export function ProverbScreen() {
     const target = reflectOn ? getScenario(reflectOn) : undefined;
     if (target && target.proverbId === id) {
       setPrefill({ key: 'reflect', text: journalStarter(target), nonce: Date.now(), editorKey });
-      navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: null });
+      navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: null, preventScrollReset: true });
     } else if (requestedScenario && !reflectOn) {
       requestAnimationFrame(() => scrollToElement(`wisdom-${requestedScenario.id}`));
     }
@@ -74,11 +74,8 @@ export function ProverbScreen() {
           />
         )
       }
-      intro={
-        <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/explore'))} className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted hover:text-forest">
-          <ArrowLeft size={16} aria-hidden /> Back
-        </button>
-      }
+      intro={<BackLink fallback="/explore" />}
+      cardHeading="h1"
     />
   );
 }

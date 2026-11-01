@@ -18,6 +18,10 @@ interface Props {
   /** Wisdom in Action (or other activity) shown after the study, before the journal. */
   activity?: ReactNode;
   prefill?: JournalPrefill | null;
+  /** The proverb reference is the page's h1 when nothing else is. */
+  cardHeading?: 'h1' | 'h2';
+  /** id for the journal section, so shortcuts can jump to it. */
+  journalAnchorId?: string;
 }
 
 /**
@@ -26,7 +30,7 @@ interface Props {
  * practice → activity (Wisdom in Action) → journal. Wide screens get more
  * whitespace rather than wider lines.
  */
-export function ProverbStudyView({ proverb, entry, dailyDate, editorKey, label, intro, activity, prefill }: Props) {
+export function ProverbStudyView({ proverb, entry, dailyDate, editorKey, label, intro, activity, prefill, cardHeading = 'h2', journalAnchorId }: Props) {
   const entries = useJournalEntries();
   const history = entries.filter((e) => e.proverbId === proverb.id && e.id !== entry?.id && !isEntryEmpty(e));
 
@@ -34,12 +38,12 @@ export function ProverbStudyView({ proverb, entry, dailyDate, editorKey, label, 
     <div className="animate-rise mx-auto max-w-[44rem]">
       {intro}
       <div className="space-y-6 md:space-y-8">
-        <ProverbCard proverb={proverb} label={label} />
+        <ProverbCard proverb={proverb} label={label} headingLevel={cardHeading} />
         <MeaningSection proverb={proverb} />
         <PracticeSection proverb={proverb} />
         <TopicLinks proverb={proverb} />
         {activity}
-        <ReflectionJournal key={editorKey} proverb={proverb} entry={entry} dailyDate={dailyDate} prefill={prefill} />
+        <ReflectionJournal key={editorKey} proverb={proverb} entry={entry} dailyDate={dailyDate} prefill={prefill} anchorId={journalAnchorId} />
 
         {history.length > 0 && (
           <section aria-labelledby={`history-${proverb.id}`}>

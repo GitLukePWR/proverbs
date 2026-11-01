@@ -1,5 +1,5 @@
 import { BookOpen, Compass, NotebookPen, Settings, Sprout } from 'lucide-react';
-import { NavLink, Outlet, useLocation } from 'react-router';
+import { NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router';
 import { useEffect } from 'react';
 import { useJournalEntries, usePreferences } from '../hooks/useStores';
 import { useToday } from '../hooks/useToday';
@@ -29,10 +29,6 @@ export function AppShell() {
   const { pathname } = useLocation();
   const prefs = usePreferences();
   const streak = useStreak();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0 });
-  }, [pathname]);
 
   useEffect(() => applyTheme(prefs.theme), [prefs.theme]);
 
@@ -85,12 +81,19 @@ export function AppShell() {
                 </span>
               </span>
             )}
-            <NavLink to="/settings" aria-label="Settings" className="icon-btn">
+            <NavLink
+              to="/settings"
+              aria-label="Settings"
+              className={({ isActive }) => `icon-btn ${isActive ? 'bg-sage-wash' : ''}`}
+            >
               <Settings size={20} strokeWidth={1.75} aria-hidden />
             </NavLink>
           </div>
         </div>
       </header>
+
+      {/* New screens open at the top; Back/Forward restores where you were. */}
+      <ScrollRestoration />
 
       <main id="main" className="mx-auto max-w-6xl px-5 pb-32 pt-6 md:px-8 md:pb-20 md:pt-10">
         <Outlet />

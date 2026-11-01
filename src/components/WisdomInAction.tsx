@@ -14,7 +14,9 @@ export type ScenarioContext =
   /** On Today, but drawn from the wider library (linked to a different proverb). */
   | 'today-other'
   /** On a proverb's own study page. */
-  | 'study';
+  | 'study'
+  /** Opened directly from Explore → Scenarios. */
+  | 'library';
 
 interface Props {
   scenario: Scenario;
@@ -25,6 +27,8 @@ interface Props {
   isToday?: boolean;
   onRevisitProverb: () => void;
   onReflect: () => void;
+  /** Heading level for the section title (h1 when it is the page's main content). */
+  headingLevel?: 'h1' | 'h2';
 }
 
 /**
@@ -32,7 +36,9 @@ interface Props {
  * optional reflection. Progress is saved as soon as an option is chosen and
  * can be changed at any time; alternatives stay open for review.
  */
-export function WisdomInAction({ scenario, proverb, context, isToday = true, onRevisitProverb, onReflect }: Props) {
+export function WisdomInAction({ scenario, proverb, context, isToday = true, onRevisitProverb, onReflect, headingLevel = 'h2' }: Props) {
+  const Title = headingLevel;
+  const Sub = headingLevel === 'h1' ? 'h2' : 'h3';
   const progressMap = useScenarioProgress();
   const progress = progressMap[scenario.id];
   const toast = useToast();
@@ -77,18 +83,20 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
   };
 
   const intro =
-    context === 'study'
-      ? 'Explore how this wisdom applies to a real-life decision.'
-      : `Explore how ${isToday ? 'today’s' : 'this day’s'} wisdom applies to real-life decisions.`;
+    context === 'library'
+      ? `Practise applying ${proverb.reference} to a real-life decision.`
+      : context === 'study'
+        ? 'Explore how this wisdom applies to a real-life decision.'
+        : `Explore how ${isToday ? 'today’s' : 'this day’s'} wisdom applies to real-life decisions.`;
 
   return (
     <section id={`wisdom-${scenario.id}`} aria-labelledby={`${baseId}-title`} className="card scroll-mt-24 overflow-hidden">
       <header className="px-5 pt-6 md:px-8 md:pt-7">
         <div className="flex items-center gap-2">
           <Signpost size={16} className="text-sage-deep" aria-hidden />
-          <h2 id={`${baseId}-title`} className="eyebrow">
+          <Title id={`${baseId}-title`} className="eyebrow">
             Wisdom in Action
-          </h2>
+          </Title>
           {progress && (
             <span className="ml-auto inline-flex items-center gap-1 text-xs text-sage-deep">
               <CircleCheck size={14} aria-hidden /> Explored
@@ -112,7 +120,7 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-sage-deep">
           The situation <span aria-hidden>·</span> <span className="normal-case tracking-normal">{proverb.reference}</span>
         </p>
-        <h3 className="mt-2 font-serif text-[1.45rem] leading-tight text-forest md:text-[1.6rem]">{scenario.title}</h3>
+        <Sub className="mt-2 font-serif text-[1.45rem] leading-tight text-forest md:text-[1.6rem]">{scenario.title}</Sub>
         <p className="prose-body mt-3 text-ink/90 text-pretty">{scenario.situation}</p>
         <p className="mt-4 font-serif text-lg italic text-forest" id={`${baseId}-question`}>
           {scenario.question}
@@ -121,7 +129,12 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
 
       {/* Stage 2: make a decision */}
       <div className="px-3 pt-4 md:px-5">
-        <ul role="group" aria-labelledby={`${baseId}-question`} className="space-y-2.5">
+        {!selectedOption && (
+          <p className="px-2 pb-3 text-sm text-muted" id={`${baseId}-hint`}>
+            Pick the response closest to what you’d really do. You’ll then see how it — and the alternatives — might play out.
+          </p>
+        )}
+        <ul role="group" aria-labelledby={`${baseId}-question`} aria-describedby={selectedOption ? undefined : `${baseId}-hint`} className="space-y-2.5">
           {options.map((option, index) => {
             const isSelected = option.id === selected;
             return (
@@ -155,7 +168,7 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
             );
           })}
         </ul>
-        {!selectedOption && <p className="px-2 pb-6 pt-3 text-xs text-faint">Choose the response closest to what you’d really do. You can change it later.</p>}
+        {!selectedOption && <p className="px-2 pb-6 pt-3 text-xs text-faint">You can change your answer at any time.</p>}
       </div>
 
       {/* Stages 3–5 are revealed only after a choice is made. */}
@@ -164,9 +177,9 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
           <div key={selectedOption.id} className="animate-rise space-y-7 px-5 pb-7 pt-6 md:px-8">
             {/* Stage 3: consequences */}
             <section aria-labelledby={`${baseId}-outcome`}>
-              <h3 id={`${baseId}-outcome`} className="eyebrow">
+              <Sub id={`${baseId}-outcome`} className="eyebrow">
                 How this might play out
-              </h3>
+              </Sub>
               <p className="mt-1 text-sm font-medium text-forest">
                 {optionLetter(selectedIndex)}. {selectedOption.label}
               </p>
@@ -174,7 +187,7 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
             </section>
 
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-ink">Compare the other responses</h3>
+              <Sub className="text-sm font-medium text-ink">Compare the other responses</Sub>
               {options.map((option, index) =>
                 option.id === selectedOption.id ? null : (
                   <details
@@ -200,17 +213,17 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
             </div>
 
             <section aria-labelledby={`${baseId}-wiser`} className="rounded-2xl bg-panel px-5 py-5 text-panel-ink md:px-6">
-              <h3 id={`${baseId}-wiser`} className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-panel-accent">
+              <Sub id={`${baseId}-wiser`} className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-panel-accent">
                 A wiser way through
-              </h3>
+              </Sub>
               <p className="mt-2.5 text-[1.02rem] leading-relaxed text-panel-ink/95 text-pretty">{scenario.wiserPath}</p>
             </section>
 
             {/* Stage 4: connect to Scripture */}
             <section aria-labelledby={`${baseId}-scripture`}>
-              <h3 id={`${baseId}-scripture`} className="eyebrow">
+              <Sub id={`${baseId}-scripture`} className="eyebrow">
                 In Scripture
-              </h3>
+              </Sub>
               <figure className="mt-3 rounded-2xl border border-line bg-paper px-5 py-5">
                 <blockquote className="font-serif text-[1.2rem] leading-relaxed text-ink">
                   {proverb.verses.map((v, i) => (
@@ -233,9 +246,9 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
 
             {/* Stage 5: optional reflection */}
             <section aria-labelledby={`${baseId}-further`} className="rounded-2xl border border-dashed border-line-strong px-5 py-4">
-              <h3 id={`${baseId}-further`} className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted">
+              <Sub id={`${baseId}-further`} className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted">
                 Take it further <span className="font-normal normal-case tracking-normal">· optional</span>
-              </h3>
+              </Sub>
               <p className="mt-1.5 font-serif text-[1.1rem] leading-snug text-forest">{scenario.followUp}</p>
             </section>
 
@@ -253,7 +266,7 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="btn-quiet" onClick={onRevisitProverb}>
                   <BookOpen size={16} aria-hidden /> Revisit the proverb
-                  {context === 'today-other' && <ArrowUpRight size={14} aria-hidden />}
+                  {(context === 'today-other' || context === 'library') && <ArrowUpRight size={14} aria-hidden />}
                 </button>
                 <button type="button" className="btn-primary" onClick={reflect}>
                   <PenLine size={16} aria-hidden /> Reflect in your journal

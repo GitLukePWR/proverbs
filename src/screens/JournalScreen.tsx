@@ -1,9 +1,10 @@
-import { BookOpen, NotebookPen, Search, X } from 'lucide-react';
+import { BookOpen, NotebookPen, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { EmptyState } from '../components/EmptyState';
 import { EntryCard } from '../components/EntryCard';
 import { PageHeader } from '../components/PageHeader';
+import { SearchField } from '../components/SearchField';
 import { entryDay, filterEntries, isEntryEmpty } from '../domain/journal';
 import { useJournalEntries } from '../hooks/useStores';
 
@@ -12,12 +13,29 @@ function monthLabel(month: string) {
   return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 }
 
+/** Session-only memory of the journal search (not persisted, not in the URL). */
+let rememberedQuery = '';
+
 export function JournalScreen() {
   const all = useJournalEntries();
   const entries = useMemo(() => all.filter((e) => !isEntryEmpty(e)), [all]);
-  const [text, setText] = useState('');
-  const [month, setMonth] = useState('');
-  const [proverbId, setProverbId] = useState('');
+  // Month/proverb filters live in the URL so they survive opening an entry and
+  // coming back. Search words can reveal private content, so they are kept in
+  // memory for this session only — never in the URL or browser history.
+  const [params, setParams] = useSearchParams();
+  const [text, setTextState] = useState(rememberedQuery);
+  const setText = (v: string) => {
+    rememberedQuery = v;
+    setTextState(v);
+  };
+  const month = params.get('month') ?? '';
+  const proverbId = params.get('proverb') ?? '';
+  const setFilter = (key: 'month' | 'proverb', value: string) => {
+    const p = new URLSearchParams(params);
+    if (value) p.set(key, value);
+    else p.delete(key);
+    setParams(p, { replace: true, preventScrollReset: true });
+  };
 
   const months = useMemo(() => [...new Set(entries.map((e) => entryDay(e).slice(0, 7)))], [entries]);
   const references = useMemo(() => {
@@ -55,22 +73,11 @@ export function JournalScreen() {
       </PageHeader>
 
       <div className="mb-6 space-y-3">
-        <label className="relative block">
-          <span className="sr-only">Search your journal</span>
-          <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" aria-hidden />
-          <input
-            type="search"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Search your reflections"
-            className="field pl-11"
-            autoComplete="off"
-          />
-        </label>
+        <SearchField value={text} onChange={setText} label="Search your journal" placeholder="Search your reflections" />
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="sr-only">Filter by month</span>
-            <select value={month} onChange={(e) => setMonth(e.target.value)} className="field py-2.5 text-sm">
+            <select value={month} onChange={(e) => setFilter('month', e.target.value)} className="field min-h-11 py-2.5 text-sm">
               <option value="">All dates</option>
               {months.map((m) => (
                 <option key={m} value={m}>
@@ -81,7 +88,7 @@ export function JournalScreen() {
           </label>
           <label className="block">
             <span className="sr-only">Filter by proverb</span>
-            <select value={proverbId} onChange={(e) => setProverbId(e.target.value)} className="field py-2.5 text-sm">
+            <select value={proverbId} onChange={(e) => setFilter('proverb', e.target.value)} className="field min-h-11 py-2.5 text-sm">
               <option value="">All proverbs</option>
               {references.map(([id, ref]) => (
                 <option key={id} value={id}>
@@ -98,11 +105,10 @@ export function JournalScreen() {
             </span>
             <button
               type="button"
-              className="inline-flex items-center gap-1 text-forest hover:underline"
+              className="inline-flex min-h-11 items-center gap-1 rounded-full px-2 text-forest hover:underline"
               onClick={() => {
                 setText('');
-                setMonth('');
-                setProverbId('');
+                setParams(new URLSearchParams(), { replace: true, preventScrollReset: true });
               }}
             >
               <X size={14} aria-hidden /> Clear filters

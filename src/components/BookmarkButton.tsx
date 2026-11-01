@@ -1,17 +1,20 @@
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { services } from '../app/services';
 import { useBookmarks } from '../hooks/useStores';
+import { useNavigate } from 'react-router';
 import { useToast } from './Toast';
 
 export function BookmarkButton({ proverbId, reference }: { proverbId: string; reference: string }) {
   const { ids } = useBookmarks();
   const toast = useToast();
+  const navigate = useNavigate();
   const saved = ids.has(proverbId);
 
   const toggle = () => {
     try {
       const nowSaved = services.bookmarks.toggle(proverbId);
-      toast(nowSaved ? `${reference} saved` : 'Removed from saved');
+      if (nowSaved) toast(`${reference} saved`, { label: 'View saved', onClick: () => navigate('/explore?tab=saved') });
+      else toast(`${reference} removed from saved`, { label: 'Undo', onClick: () => services.bookmarks.toggle(proverbId) });
     } catch {
       toast('Could not save — browser storage is unavailable');
     }

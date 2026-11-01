@@ -19,7 +19,7 @@ export function SaveIndicator({ status, savedAt }: { status: SaveStatus; savedAt
   } else if (status === 'error') {
     content = (
       <span className="inline-flex items-center gap-1.5 text-clay">
-        <AlertCircle size={13} aria-hidden /> Not saved — browser storage is full or unavailable
+        <AlertCircle size={13} aria-hidden /> Not saved yet — browser storage is full or blocked. Retrying; keep this tab open.
       </span>
     );
   } else {

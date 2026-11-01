@@ -10,7 +10,7 @@ interface Props {
   headingLevel?: 'h1' | 'h2';
 }
 
-export function ProverbCard({ proverb, label, headingLevel = 'h1' }: Props) {
+export function ProverbCard({ proverb, label, headingLevel = 'h2' }: Props) {
   const translation = getTranslation(proverb.translationId);
   const Heading = headingLevel;
   const showVerseNumbers = proverb.verses.length > 1;
