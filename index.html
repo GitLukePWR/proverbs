@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#F6F2E9" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Apply a saved light/dark choice before first paint (no flash). "Automatic"
+      // needs nothing here: the CSS follows prefers-color-scheme.
+      try {
+        var t = (JSON.parse(localStorage.getItem('wize.preferences') || 'null') || {}).data;
+        t = t && t.theme;
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        if (t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches))
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#121814');
+      } catch (e) {}
+    </script>
     <meta name="description" content="Wize — one proverb a day, explained in today's words, with space to reflect." />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="apple-touch-icon" href="./favicon.svg" />

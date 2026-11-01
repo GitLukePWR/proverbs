@@ -124,7 +124,17 @@ describe('bookmarks', () => {
 describe('preferences', () => {
   it('falls back to defaults for invalid values', () => {
     const kv = createMemoryStore({ 'wize.preferences': JSON.stringify({ version: 1, data: { translationId: 'xyz', readingSize: 'huge' } }) });
-    expect(createPreferencesStore(kv).repository.getSnapshot()).toEqual({ translationId: 'web', readingSize: 'standard' });
+    expect(createPreferencesStore(kv).repository.getSnapshot()).toEqual({ translationId: 'web', readingSize: 'standard', theme: 'system' });
+  });
+
+  it('defaults the theme to automatic for older saved preferences, and keeps explicit choices', () => {
+    const old = createMemoryStore({ 'wize.preferences': JSON.stringify({ version: 1, data: { translationId: 'web', readingSize: 'large' } }) });
+    expect(createPreferencesStore(old).repository.getSnapshot()).toEqual({ translationId: 'web', readingSize: 'large', theme: 'system' });
+    const kv = createMemoryStore();
+    createPreferencesStore(kv).update({ theme: 'dark' });
+    expect(createPreferencesStore(kv).repository.getSnapshot().theme).toBe('dark');
+    const bad = createMemoryStore({ 'wize.preferences': JSON.stringify({ version: 1, data: { theme: 'neon' } }) });
+    expect(createPreferencesStore(bad).repository.getSnapshot().theme).toBe('system');
   });
 });
 

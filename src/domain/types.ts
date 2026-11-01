@@ -114,9 +114,13 @@ export interface JournalEntry {
 
 export type ReadingSize = 'standard' | 'large';
 
+/** "system" follows the device's light/dark setting. */
+export type ThemePreference = 'system' | 'light' | 'dark';
+
 export interface Preferences {
   translationId: TranslationId;
   readingSize: ReadingSize;
+  theme: ThemePreference;
 }
 
 export interface Bookmark {

@@ -6,6 +6,7 @@ import { useToday } from '../hooks/useToday';
 import { currentStreak } from '../domain/streak';
 import { isEntryEmpty } from '../domain/journal';
 import { Wordmark } from './Wordmark';
+import { applyTheme } from '../platform/theme';
 
 const NAV = [
   { to: '/', label: 'Today', icon: BookOpen, end: true },
@@ -32,6 +33,8 @@ export function AppShell() {
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [pathname]);
+
+  useEffect(() => applyTheme(prefs.theme), [prefs.theme]);
 
   return (
     <div data-reading={prefs.readingSize} className="min-h-dvh bg-cream">

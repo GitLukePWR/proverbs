@@ -199,11 +199,11 @@ export function WisdomInAction({ scenario, proverb, context, isToday = true, onR
               <p className="text-xs text-faint">Changed your mind? Choose a different response above — your journal won’t be affected.</p>
             </div>
 
-            <section aria-labelledby={`${baseId}-wiser`} className="rounded-2xl bg-forest px-5 py-5 text-cream md:px-6">
-              <h3 id={`${baseId}-wiser`} className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-sage">
+            <section aria-labelledby={`${baseId}-wiser`} className="rounded-2xl bg-panel px-5 py-5 text-panel-ink md:px-6">
+              <h3 id={`${baseId}-wiser`} className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-panel-accent">
                 A wiser way through
               </h3>
-              <p className="mt-2.5 text-[1.02rem] leading-relaxed text-cream/95 text-pretty">{scenario.wiserPath}</p>
+              <p className="mt-2.5 text-[1.02rem] leading-relaxed text-panel-ink/95 text-pretty">{scenario.wiserPath}</p>
             </section>
 
             {/* Stage 4: connect to Scripture */}

@@ -4,7 +4,7 @@ import { NAMESPACE, type DocumentSpec, isObject } from './document';
 import type { KeyValueStore } from './kv';
 import { createRepository, type Repository } from './repository';
 
-export const DEFAULT_PREFERENCES: Preferences = { translationId: DEFAULT_TRANSLATION_ID, readingSize: 'standard' };
+export const DEFAULT_PREFERENCES: Preferences = { translationId: DEFAULT_TRANSLATION_ID, readingSize: 'standard', theme: 'system' };
 
 export const preferencesSpec: DocumentSpec<Preferences> = {
   key: `${NAMESPACE}.preferences`,
@@ -15,6 +15,9 @@ export const preferencesSpec: DocumentSpec<Preferences> = {
     return {
       translationId: isTranslationId(d.translationId) ? d.translationId : DEFAULT_PREFERENCES.translationId,
       readingSize: d.readingSize === 'large' ? 'large' : 'standard',
+      // Added after v1 shipped: older documents simply lack it and get the default,
+      // so no schema version bump or migration is needed.
+      theme: d.theme === 'light' || d.theme === 'dark' ? d.theme : 'system',
     };
   },
 };

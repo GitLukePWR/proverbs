@@ -17,8 +17,61 @@
   --color-line: #e2dccd;
   --color-line-strong: #cfc7b4;
   --color-clay: #a4553a;
+  /* Deep emphasis panels ("Live It Today", "A wiser way through"). */
+  --color-panel: #23382c;
+  --color-panel-ink: #f6f2e9;
+  --color-panel-accent: #a9b894;
 
   --ease-calm: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/*
+ * Dark mode. "Automatic" (no data-theme attribute) follows the system
+ * setting; an explicit data-theme of "light" or "dark" overrides it. The
+ * attribute is set before first paint by a small script in index.html.
+ */
+:root {
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-cream: #121814;
+    --color-paper: #1a211c;
+    --color-ink: #e7e3d7;
+    --color-forest: #d3e0c8;
+    --color-forest-soft: #bccfae;
+    --color-muted: #a9b2aa;
+    --color-faint: #848e86;
+    --color-sage: #9aae86;
+    --color-sage-deep: #adc298;
+    --color-sage-wash: #243028;
+    --color-line: #2a342d;
+    --color-line-strong: #3b473e;
+    --color-clay: #e08f71;
+    --color-panel: #1f3127;
+    --color-panel-ink: #ece8dc;
+    --color-panel-accent: #a9c093;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --color-cream: #121814;
+  --color-paper: #1a211c;
+  --color-ink: #e7e3d7;
+  --color-forest: #d3e0c8;
+  --color-forest-soft: #bccfae;
+  --color-muted: #a9b2aa;
+  --color-faint: #848e86;
+  --color-sage: #9aae86;
+  --color-sage-deep: #adc298;
+  --color-sage-wash: #243028;
+  --color-line: #2a342d;
+  --color-line-strong: #3b473e;
+  --color-clay: #e08f71;
+  --color-panel: #1f3127;
+  --color-panel-ink: #ece8dc;
+  --color-panel-accent: #a9c093;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -86,7 +139,7 @@
     @apply btn border border-line-strong bg-transparent text-forest hover:bg-sage-wash;
   }
   .btn-danger {
-    @apply btn bg-clay text-white hover:bg-[#8e4630];
+    @apply btn bg-clay text-cream hover:bg-clay/85;
   }
   .icon-btn {
     @apply inline-flex h-10 w-10 items-center justify-center rounded-full text-forest transition-colors duration-200 hover:bg-sage-wash;

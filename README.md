@@ -15,6 +15,7 @@ It is a static React app: no backend, no accounts, no analytics, no environment 
 - **Saved**: bookmark any study.
 - **Share**: Web Share API with clipboard fallback. Shares the Scripture text, plus the explanation if you choose. It never includes journal text.
 - **Export**: download your journal as JSON (complete) or Markdown (readable).
+- **Dark mode**: Automatic (follows the device's light/dark setting, the default), Light or Dark, chosen in Settings. A saved choice is applied before first paint, so there's no flash.
 - **Offline**: all content is bundled, and a small service worker caches the app after the first visit.
 - Accessible: semantic HTML, keyboard navigation, visible focus, labelled icon buttons, reduced-motion support, mobile-first layout.
 
@@ -62,6 +63,7 @@ Key decisions:
 - **Daily selection** (`domain/daily.ts`) maps the local calendar date to a day number, groups days into cycles the length of the library, and shuffles each cycle with a seeded PRNG. The same date always gives the same proverb, every study appears once per cycle, and no proverb repeats on consecutive days. Once you write an entry for a date, that entry pins the proverb, so history survives library changes.
 - **Storage** goes through a tiny `KeyValueStore` interface (`storage/kv.ts`). Each document is stored as `{ version, data }`, migrated forward on read and sanitised field by field. Unreadable data is copied to a `*.unreadable-<timestamp>` key and the app carries on with defaults instead of crashing. Only `app/services.ts` knows that localStorage is in use.
 - **Wisdom in Action** content lives in `content/scenarios.ts`, linked to studies by ID; Scripture is always resolved from the study library. `domain/scenarios.ts` picks the day's scenario: one linked to the day's proverb if available, otherwise one from the wider library (labelled as such), never the same scenario two days running. Options are shown in a fixed order per scenario that varies across the library, so the most considered response isn't always in the same place. Progress is a separate versioned document (`wize.scenarios`), so no migration of existing data was needed. "Reflect in your journal" starts the existing journal's *Reflect* answer with the follow-up question, only if that answer is empty.
+- **Theming**: every colour is a design token in `src/index.css`. Dark mode redefines those tokens under `prefers-color-scheme: dark` (Automatic) or `[data-theme]` (explicit choice), so components need no dark-specific classes. `platform/theme.ts` applies the preference and updates the browser's theme colour.
 - **Journal entries** store `proverbId`, the reference, and a snapshot of the Scripture text and prompts, so old entries stay meaningful if content changes.
 
 ## Data persistence & limitations

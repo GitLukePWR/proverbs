@@ -29,10 +29,10 @@ export function MeaningSection({ proverb }: { proverb: Proverb }) {
 
 export function PracticeSection({ proverb }: { proverb: Proverb }) {
   return (
-    <section aria-labelledby={`practice-${proverb.id}`} className="rounded-2xl bg-forest px-6 py-6 text-cream md:px-8">
+    <section aria-labelledby={`practice-${proverb.id}`} className="rounded-2xl bg-panel px-6 py-6 text-panel-ink md:px-8">
       <div className="flex items-center gap-2">
-        <Footprints size={16} className="text-sage" aria-hidden />
-        <h2 id={`practice-${proverb.id}`} className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-sage">
+        <Footprints size={16} className="text-panel-accent" aria-hidden />
+        <h2 id={`practice-${proverb.id}`} className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-panel-accent">
           Live It Today
         </h2>
       </div>

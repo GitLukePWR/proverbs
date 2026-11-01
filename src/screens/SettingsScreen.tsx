@@ -1,4 +1,4 @@
-import { BellOff, Download, HardDrive, Info, ShieldCheck, Signpost, Trash2, TriangleAlert } from 'lucide-react';
+import { BellOff, Download, HardDrive, Info, Monitor, Moon, Sun, ShieldCheck, Signpost, Trash2, TriangleAlert } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { services, storageRecoveredFromError } from '../app/services';
 import { STUDY_COUNT } from '../content/library';
@@ -7,7 +7,7 @@ import { PageHeader } from '../components/PageHeader';
 import { useToast } from '../components/Toast';
 import { toDateKey } from '../domain/dates';
 import { entriesToJson, entriesToMarkdown, isEntryEmpty } from '../domain/journal';
-import type { ReadingSize, TranslationId } from '../domain/types';
+import type { ReadingSize, ThemePreference, TranslationId } from '../domain/types';
 import { downloadFile } from '../platform/download';
 import { useJournalEntries, usePreferences, useScenarioProgress } from '../hooks/useStores';
 
@@ -85,6 +85,23 @@ export function SettingsScreen() {
 
       <div className="space-y-5">
         <Section title="Reading" icon={<Info size={18} aria-hidden />}>
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium text-ink">Appearance</legend>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  ['system', 'Automatic', Monitor],
+                  ['light', 'Light', Sun],
+                  ['dark', 'Dark', Moon],
+                ] as [ThemePreference, string, typeof Sun][]
+              ).map(([value, label, Icon]) => (
+                <button key={value} type="button" className="chip gap-1.5" aria-pressed={prefs.theme === value} onClick={() => updatePrefs({ theme: value })}>
+                  <Icon size={15} aria-hidden /> {label}
+                </button>
+              ))}
+            </div>
+            <span className="mt-2 block text-xs">Automatic matches your device’s light or dark setting.</span>
+          </fieldset>
           <fieldset>
             <legend className="mb-2 text-sm font-medium text-ink">Text size</legend>
             <div className="flex gap-2">
