@@ -123,3 +123,66 @@ export interface Bookmark {
   proverbId: string;
   createdAt: string;
 }
+
+/* ------------------------------------------------------------------ */
+/* Wisdom in Action                                                    */
+/* ------------------------------------------------------------------ */
+
+export type ScenarioOptionId = 'a' | 'b' | 'c';
+export const SCENARIO_OPTION_IDS: readonly ScenarioOptionId[] = ['a', 'b', 'c'] as const;
+
+export interface ScenarioOption {
+  id: ScenarioOptionId;
+  /** Short statement of the response, e.g. "Stay composed and ask for specifics." */
+  label: string;
+  /** One sentence describing what this response looks like in practice. */
+  detail: string;
+  /** Why it appeals, likely consequences (short and long term), and how the proverb speaks to it. */
+  feedback: string;
+}
+
+/**
+ * A curated, realistic decision linked to one proverb study. All text is
+ * original Wize commentary; Scripture is resolved from the linked study.
+ */
+export interface Scenario {
+  /** Stable identifier, e.g. `sc-unfair-criticism`. Never rename once shipped. */
+  id: string;
+  /** Stable ID of the linked proverb study (see content/studies.ts). */
+  proverbId: string;
+  topics: TopicId[];
+  title: string;
+  /** Second-person setup, readable in a few seconds. */
+  situation: string;
+  /** The decision prompt, e.g. "How do you respond?" */
+  question: string;
+  options: [ScenarioOption, ScenarioOption, ScenarioOption];
+  /**
+   * The option most aligned with the proverb, or null when the wise choice
+   * genuinely depends on context. Editorial metadata: the UI deliberately
+   * does not label answers right or wrong.
+   */
+  alignedOptionId: ScenarioOptionId | null;
+  /** The most wisdom-aligned approach, including nuance and limits. */
+  wiserPath: string;
+  /** How the proverb speaks to this situation (commentary, not Scripture). */
+  connection: string;
+  /** One optional personal follow-up question. */
+  followUp: string;
+}
+
+export interface ScenarioProgress {
+  scenarioId: string;
+  proverbId: string;
+  /** The user's current choice. Changing it never touches the journal. */
+  selectedOptionId: ScenarioOptionId;
+  /** Every option whose feedback the user has opened, in first-viewed order. */
+  viewedOptionIds: ScenarioOptionId[];
+  completed: boolean;
+  /** Local calendar day the scenario was first completed. */
+  completedOn: DateKey;
+  completedAt: string; // ISO timestamp of first completion
+  updatedAt: string; // ISO timestamp of the latest change
+  /** True once the user chose to take the follow-up into their journal. */
+  journalPrompted: boolean;
+}

@@ -1,12 +1,21 @@
 import { Lock, PenLine } from 'lucide-react';
-import { useId } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { formatDateTime } from '../domain/dates';
 import { PROMPT_LABELS } from '../domain/journal';
-import type { DateKey, JournalEntry, Proverb, ReflectionPrompts } from '../domain/types';
+import type { DateKey, JournalEntry, PromptKey, Proverb, ReflectionPrompts } from '../domain/types';
 import { PROMPT_KEYS } from '../domain/types';
 import { useReflectionDraft } from '../hooks/useReflectionDraft';
 import { AutoTextarea } from './AutoTextarea';
 import { SaveIndicator } from './SaveIndicator';
+import { useToast } from './Toast';
+
+/** A request to start an answer with some text. Applied only if that answer is empty. */
+export interface JournalPrefill {
+  key: PromptKey;
+  text: string;
+  /** Changes for each new request, so repeated clicks re-focus the field. */
+  nonce: number;
+}
 
 interface Props {
   proverb: Proverb;
@@ -15,18 +24,44 @@ interface Props {
   /** Prompts to show; defaults to the proverb's. Past entries pass their snapshot. */
   prompts?: ReflectionPrompts;
   title?: string;
+  prefill?: JournalPrefill | null;
 }
 
 /**
  * Guided reflection: the three prompts, each with its own answer field, plus
  * free notes. Autosaves to the device. Remount (via `key`) to switch entries.
  */
-export function ReflectionJournal({ proverb, entry, dailyDate, prompts = proverb.prompts, title = 'Your Reflection' }: Props) {
+export function ReflectionJournal({ proverb, entry, dailyDate, prompts = proverb.prompts, title = 'Your Reflection', prefill }: Props) {
   const draft = useReflectionDraft({ proverb, entry, dailyDate });
   const baseId = useId();
+  const toast = useToast();
+  const sectionRef = useRef<HTMLElement>(null);
+  const answersRef = useRef(draft.answers);
+  answersRef.current = draft.answers;
+  const { setAnswer } = draft;
+
+  // Start the requested answer with the given text, but never overwrite what
+  // the user has already written. Either way, bring them to the field.
+  useEffect(() => {
+    if (!prefill) return;
+    const existing = answersRef.current[prefill.key];
+    const applied = !existing.trim();
+    if (applied) setAnswer(prefill.key, prefill.text);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    sectionRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    const field = document.getElementById(`${baseId}-${prefill.key}`) as HTMLTextAreaElement | null;
+    window.setTimeout(() => {
+      if (!field) return;
+      field.focus({ preventScroll: true });
+      const end = field.value.length;
+      field.setSelectionRange(end, end);
+    }, reduce ? 0 : 350);
+    if (!applied) toast('Your existing reflection was kept as it is');
+    // Only react to new requests.
+  }, [prefill?.nonce]);
 
   return (
-    <section aria-labelledby={`${baseId}-title`} className="card px-5 py-6 md:px-8 md:py-8">
+    <section ref={sectionRef} aria-labelledby={`${baseId}-title`} className="card scroll-mt-24 px-5 py-6 md:px-8 md:py-8">
       <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
         <div>
           <div className="flex items-center gap-2">

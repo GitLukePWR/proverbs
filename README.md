@@ -9,6 +9,7 @@ It is a static React app: no backend, no accounts, no analytics, no environment 
 ## Features
 
 - **Today**: a deterministic daily proverb, its meaning, a practice, tailored reflection prompts and an autosaving journal. Step back through previous days to revisit their proverbs and entries.
+- **Wisdom in Action**: a short interactive scenario on the Today screen. Read a realistic situation, choose one of three plausible responses, then see how it might play out, compare the alternatives, read the linked Scripture and an explanation of the connection, and optionally take a follow-up question into your journal. There are 20 curated scenarios; progress is saved and can be revisited from Explore.
 - **Journal**: every reflection, newest first, with search, month/proverb filters, editing and deletion (with confirmation).
 - **Explore**: 45 guided studies filterable by topic, search by reference (`3:5`, `prov 16`) or keyword, and the full text of all 31 chapters.
 - **Saved**: bookmark any study.
@@ -60,6 +61,7 @@ Key decisions:
 - **Content is separate from presentation and from Scripture.** `studies.ts` holds only references plus original commentary. Verse text is looked up from the translation file at runtime, so the wording is always verbatim from the source, and adding a translation means adding one JSON file plus a registry entry.
 - **Daily selection** (`domain/daily.ts`) maps the local calendar date to a day number, groups days into cycles the length of the library, and shuffles each cycle with a seeded PRNG. The same date always gives the same proverb, every study appears once per cycle, and no proverb repeats on consecutive days. Once you write an entry for a date, that entry pins the proverb, so history survives library changes.
 - **Storage** goes through a tiny `KeyValueStore` interface (`storage/kv.ts`). Each document is stored as `{ version, data }`, migrated forward on read and sanitised field by field. Unreadable data is copied to a `*.unreadable-<timestamp>` key and the app carries on with defaults instead of crashing. Only `app/services.ts` knows that localStorage is in use.
+- **Wisdom in Action** content lives in `content/scenarios.ts`, linked to studies by ID; Scripture is always resolved from the study library. `domain/scenarios.ts` picks the day's scenario: one linked to the day's proverb if available, otherwise one from the wider library (labelled as such), never the same scenario two days running. Options are shown in a fixed order per scenario that varies across the library, so the most considered response isn't always in the same place. Progress is a separate versioned document (`wize.scenarios`), so no migration of existing data was needed. "Reflect in your journal" starts the existing journal's *Reflect* answer with the follow-up question, only if that answer is empty.
 - **Journal entries** store `proverbId`, the reference, and a snapshot of the Scripture text and prompts, so old entries stay meaningful if content changes.
 
 ## Data persistence & limitations
@@ -68,6 +70,7 @@ Key decisions:
 - Browsers cap localStorage at roughly 5 MB per site. That is years of text entries, but if a write fails the save indicator says so instead of failing silently.
 - **Reminders are not implemented.** A static site can't reliably send scheduled notifications while closed, so they're deferred to the native app. The Settings page says this plainly.
 - The library covers **45 guided studies**, not every proverb. All 31 chapters can be read in full, but only curated verses have explanations and prompts. The UI never presents the studies as the complete book.
+- Wisdom in Action has 20 scenarios for 20 of the 45 studies. On other days a scenario from the wider library is shown and clearly labelled with its own proverb. Scenario progress, like the journal, is stored only on this device and isn't included in journal exports.
 - Only one translation (WEB) ships today. The preference and registry are ready for more.
 
 ## Scripture licensing

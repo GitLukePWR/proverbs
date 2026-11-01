@@ -16,7 +16,7 @@ export function ProverbCard({ proverb, label, headingLevel = 'h1' }: Props) {
   const showVerseNumbers = proverb.verses.length > 1;
 
   return (
-    <article className="card relative overflow-hidden px-6 pb-6 pt-6 md:px-9 md:pb-8 md:pt-8" aria-labelledby={`ref-${proverb.id}`}>
+    <article id={`proverb-${proverb.id}`} className="card relative scroll-mt-24 overflow-hidden px-6 pb-6 pt-6 md:px-9 md:pb-8 md:pt-8" aria-labelledby={`ref-${proverb.id}`}>
       <div className="relative flex items-start justify-between gap-3">
         <div>
           {label && <p className="eyebrow mb-2">{label}</p>}

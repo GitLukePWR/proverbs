@@ -1,15 +1,16 @@
-import { Bookmark, Search, X } from 'lucide-react';
+import { Bookmark, ChevronRight, CircleCheck, Search, Signpost, X } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { STUDY_COUNT, listProverbs, studiesInChapter } from '../content/library';
 import { TOPICS } from '../content/topics';
+import { SCENARIO_COUNT, listScenarios } from '../content/scenarioLibrary';
 import { CHAPTER_COUNT, getChapterVerses } from '../content/translations';
 import { PageHeader } from '../components/PageHeader';
 import { ProverbListItem } from '../components/ProverbListItem';
 import { parseReference } from '../domain/reference';
 import { searchProverbs, searchVerses } from '../domain/search';
 import type { TopicId } from '../domain/types';
-import { useBookmarks, usePreferences } from '../hooks/useStores';
+import { useBookmarks, usePreferences, useScenarioProgress } from '../hooks/useStores';
 
 const isTopic = (v: string | null): v is TopicId => !!v && TOPICS.some((t) => t.id === v);
 
@@ -17,6 +18,7 @@ export function ExploreScreen() {
   const [params, setParams] = useSearchParams();
   const prefs = usePreferences();
   const { list: bookmarks } = useBookmarks();
+  const scenarioProgress = useScenarioProgress();
   const q = params.get('q') ?? '';
   const topicParam = params.get('topic');
   const topic = isTopic(topicParam) ? topicParam : null;
@@ -31,6 +33,10 @@ export function ExploreScreen() {
   );
   const ref = q ? parseReference(q) : null;
   const verseHits = q.trim().length > 2 && !ref ? searchVerses(allChapters, q, 30) : [];
+
+  const proverbById = new Map(proverbs.map((p) => [p.id, p]));
+  const scenarios = listScenarios().filter((sc) => !topic || sc.topics.includes(topic));
+  const exploredCount = listScenarios().filter((sc) => scenarioProgress[sc.id]).length;
 
   const update = (next: { q?: string; topic?: TopicId | null }) => {
     const p = new URLSearchParams(params);
@@ -122,6 +128,45 @@ export function ExploreScreen() {
           </ul>
         )}
       </section>
+
+      {!q && scenarios.length > 0 && (
+        <section aria-labelledby="wia-heading" className="mt-12">
+          <div className="mb-3 flex items-baseline justify-between px-1">
+            <h2 id="wia-heading" className="eyebrow flex items-center gap-1.5">
+              <Signpost size={14} aria-hidden /> Wisdom in Action
+            </h2>
+            <span className="text-xs text-muted">
+              {exploredCount} of {SCENARIO_COUNT} explored
+            </span>
+          </div>
+          <p className="mb-4 px-1 text-sm text-muted">Real-life decisions to practise applying a proverb. Revisit any you’ve explored to review your choice.</p>
+          <ul className="grid gap-2 md:grid-cols-2">
+            {scenarios.map((sc) => {
+              const done = !!scenarioProgress[sc.id];
+              const linked = proverbById.get(sc.proverbId);
+              return (
+                <li key={sc.id}>
+                  <Link
+                    to={`/proverb/${sc.proverbId}?scenario=${sc.id}`}
+                    className="group flex items-center gap-3 rounded-xl border border-line bg-paper px-4 py-3 transition-colors hover:border-line-strong"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-medium text-ink">{sc.title}</span>
+                      <span className="text-xs text-muted">{linked?.reference}</span>
+                    </span>
+                    {done && (
+                      <span className="inline-flex items-center gap-1 text-xs text-sage-deep">
+                        <CircleCheck size={14} aria-hidden /> Explored
+                      </span>
+                    )}
+                    <ChevronRight size={16} className="shrink-0 text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {verseHits.length > 0 && (
         <section aria-labelledby="verses-heading" className="mt-10">

@@ -21,3 +21,7 @@ export function useBookmarks() {
   const ids = useMemo(() => new Set(list.map((b) => b.proverbId)), [list]);
   return { list, ids };
 }
+
+export function useScenarioProgress() {
+  return useRepository(services.scenarioProgress.repository);
+}

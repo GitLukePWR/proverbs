@@ -2,6 +2,7 @@ import { createBookmarkStore } from '../storage/bookmarkStore';
 import { createJournalStore } from '../storage/journalStore';
 import { createWebStorageStore } from '../storage/kv';
 import { createPreferencesStore } from '../storage/preferencesStore';
+import { createScenarioProgressStore } from '../storage/scenarioProgressStore';
 
 /**
  * Composition root: the only place that knows persistence is localStorage.
@@ -14,16 +15,17 @@ export const services = {
   journal: createJournalStore(kv),
   bookmarks: createBookmarkStore(kv),
   preferences: createPreferencesStore(kv),
+  scenarioProgress: createScenarioProgressStore(kv),
 };
 
-export const storageRecoveredFromError = [services.journal, services.bookmarks, services.preferences].some(
+export const storageRecoveredFromError = [services.journal, services.bookmarks, services.preferences, services.scenarioProgress].some(
   (s) => s.repository.readStatus === 'recovered',
 );
 
 // Keep multiple open tabs in step.
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event) => {
-    for (const store of [services.journal, services.bookmarks, services.preferences]) {
+    for (const store of [services.journal, services.bookmarks, services.preferences, services.scenarioProgress]) {
       if (event.key === null || event.key === store.repository.key) store.repository.reload();
     }
   });

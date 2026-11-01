@@ -1,7 +1,13 @@
 import { ChevronLeft, ChevronRight, CircleCheck, CircleDashed } from 'lucide-react';
-import { Link, Navigate, useParams } from 'react-router';
+import { useState } from 'react';
+import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { getDailyProverbId, getProverb } from '../content/library';
 import { ProverbStudyView } from '../components/ProverbStudyView';
+import type { JournalPrefill } from '../components/ReflectionJournal';
+import { WisdomInAction } from '../components/WisdomInAction';
+import { getDailyScenario } from '../content/scenarioLibrary';
+import { journalStarter } from '../domain/scenarios';
+import { scrollToElement } from '../platform/scroll';
 import { addDays, compareDateKeys, formatLongDate, isValidDateKey } from '../domain/dates';
 import { isEntryEmpty } from '../domain/journal';
 import { useJournalEntries, usePreferences } from '../hooks/useStores';
@@ -12,6 +18,10 @@ export function TodayScreen() {
   const today = useToday();
   const prefs = usePreferences();
   const entries = useJournalEntries();
+  const navigate = useNavigate();
+  // Prefill requests are tied to the editor they were made for, so moving to
+  // another day never carries one across.
+  const [prefill, setPrefill] = useState<(JournalPrefill & { editorKey: string }) | null>(null);
 
   const requested = params.date;
   if (requested !== undefined && (!isValidDateKey(requested) || compareDateKeys(requested, today) > 0)) {
@@ -28,6 +38,28 @@ export function TodayScreen() {
   const proverbId = dayEntry?.proverbId ?? getDailyProverbId(date);
   const proverb = getProverb(proverbId, prefs.translationId);
   if (!proverb) return null; // unreachable: daily IDs come from the library
+
+  const editorKey = `daily-${date}-${proverb.id}`;
+  const { scenario, matchesProverb } = getDailyScenario(date, proverb.id);
+  const scenarioProverb = matchesProverb ? proverb : getProverb(scenario.proverbId, prefs.translationId);
+
+  const activity = scenarioProverb && (
+    <WisdomInAction
+      key={scenario.id}
+      scenario={scenario}
+      proverb={scenarioProverb}
+      context={matchesProverb ? 'today' : 'today-other'}
+      isToday={isToday}
+      onRevisitProverb={() =>
+        matchesProverb ? scrollToElement(`proverb-${proverb.id}`, { focus: true }) : navigate(`/proverb/${scenario.proverbId}`)
+      }
+      onReflect={() =>
+        matchesProverb
+          ? setPrefill({ key: 'reflect', text: journalStarter(scenario), nonce: Date.now(), editorKey })
+          : navigate(`/proverb/${scenario.proverbId}`, { state: { reflectOnScenario: scenario.id } })
+      }
+    />
+  );
 
   const reflected = !!dayEntry && !isEntryEmpty(dayEntry);
   const previous = addDays(date, -1);
@@ -80,7 +112,9 @@ export function TodayScreen() {
       proverb={proverb}
       entry={dayEntry}
       dailyDate={date}
-      editorKey={`daily-${date}-${proverb.id}`}
+      editorKey={editorKey}
+      activity={activity}
+      prefill={prefill?.editorKey === editorKey ? prefill : null}
       label={isToday ? 'Proverb of the day' : 'Proverb for this day'}
       intro={intro}
     />

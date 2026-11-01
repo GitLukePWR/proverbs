@@ -1,4 +1,4 @@
-import { BellOff, Download, HardDrive, Info, ShieldCheck, Trash2, TriangleAlert } from 'lucide-react';
+import { BellOff, Download, HardDrive, Info, ShieldCheck, Signpost, Trash2, TriangleAlert } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { services, storageRecoveredFromError } from '../app/services';
 import { STUDY_COUNT } from '../content/library';
@@ -9,7 +9,7 @@ import { toDateKey } from '../domain/dates';
 import { entriesToJson, entriesToMarkdown, isEntryEmpty } from '../domain/journal';
 import type { ReadingSize, TranslationId } from '../domain/types';
 import { downloadFile } from '../platform/download';
-import { useJournalEntries, usePreferences } from '../hooks/useStores';
+import { useJournalEntries, usePreferences, useScenarioProgress } from '../hooks/useStores';
 
 function Section({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
   return (
@@ -28,6 +28,8 @@ export function SettingsScreen() {
   const entries = useJournalEntries();
   const toast = useToast();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const explored = Object.keys(useScenarioProgress()).length;
   const written = entries.filter((e) => !isEntryEmpty(e));
   const translations = listTranslations();
 
@@ -53,6 +55,16 @@ export function SettingsScreen() {
       toast('All journal entries deleted');
     } catch {
       toast('Could not delete — browser storage is unavailable');
+    }
+  };
+
+  const resetScenarios = () => {
+    try {
+      services.scenarioProgress.clear();
+      setConfirmReset(false);
+      toast('Wisdom in Action progress cleared');
+    } catch {
+      toast('Could not clear — browser storage is unavailable');
     }
   };
 
@@ -144,6 +156,37 @@ export function SettingsScreen() {
               </button>
             )}
           </div>
+        </Section>
+
+        <Section title="Wisdom in Action" icon={<Signpost size={18} aria-hidden />}>
+          <p>
+            You’ve explored <strong className="font-semibold text-ink">{explored}</strong> {explored === 1 ? 'scenario' : 'scenarios'}. Your choices are saved on this
+            device alongside your journal, but separately from it, so clearing them never touches your reflections.
+          </p>
+          {confirmReset ? (
+            <div role="alertdialog" aria-labelledby="reset-wia" className="space-y-3">
+              <p id="reset-wia" className="text-ink">
+                Clear your choices for every scenario? Your journal entries will not be affected.
+              </p>
+              <div className="flex gap-2">
+                <button type="button" className="btn-quiet" onClick={() => setConfirmReset(false)} autoFocus>
+                  Cancel
+                </button>
+                <button type="button" className="btn-danger" onClick={resetScenarios}>
+                  Clear progress
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 text-sm text-clay hover:underline disabled:opacity-50 disabled:no-underline"
+              onClick={() => setConfirmReset(true)}
+              disabled={explored === 0}
+            >
+              <Trash2 size={15} aria-hidden /> Clear Wisdom in Action progress
+            </button>
+          )}
         </Section>
 
         <Section title="Privacy" icon={<ShieldCheck size={18} aria-hidden />}>

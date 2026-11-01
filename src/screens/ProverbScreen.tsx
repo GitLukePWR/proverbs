@@ -1,5 +1,11 @@
 import { ArrowLeft } from 'lucide-react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
+import type { JournalPrefill } from '../components/ReflectionJournal';
+import { WisdomInAction } from '../components/WisdomInAction';
+import { getScenario, scenariosForProverb } from '../content/scenarioLibrary';
+import { journalStarter } from '../domain/scenarios';
+import { scrollToElement } from '../platform/scroll';
 import { getProverb } from '../content/library';
 import { EmptyState } from '../components/EmptyState';
 import { ProverbStudyView } from '../components/ProverbStudyView';
@@ -13,7 +19,29 @@ export function ProverbScreen() {
   const today = useToday();
   const entries = useJournalEntries();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [search] = useSearchParams();
+  const [prefill, setPrefill] = useState<(JournalPrefill & { editorKey: string }) | null>(null);
+  const editorKey = `explore-${id}-${today}`;
   const proverb = getProverb(id, prefs.translationId);
+
+  // A specific scenario can be requested (?scenario=…); otherwise show the first linked one.
+  const requestedScenario = getScenario(search.get('scenario') ?? '');
+  const scenario =
+    requestedScenario && requestedScenario.proverbId === id ? requestedScenario : scenariosForProverb(id)[0];
+  const reflectOn = (location.state as { reflectOnScenario?: string } | null)?.reflectOnScenario;
+
+  useEffect(() => {
+    // Arriving from Today's "Reflect in your journal" for a scenario linked to this proverb.
+    const target = reflectOn ? getScenario(reflectOn) : undefined;
+    if (target && target.proverbId === id) {
+      setPrefill({ key: 'reflect', text: journalStarter(target), nonce: Date.now(), editorKey });
+      navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: null });
+    } else if (requestedScenario && !reflectOn) {
+      requestAnimationFrame(() => scrollToElement(`wisdom-${requestedScenario.id}`));
+    }
+    // Run once per arrival.
+  }, [id, reflectOn]);
 
   if (!proverb) {
     return (
@@ -31,8 +59,21 @@ export function ProverbScreen() {
       proverb={proverb}
       entry={entry}
       dailyDate={null}
-      editorKey={`explore-${proverb.id}-${today}`}
+      editorKey={editorKey}
       label="Study"
+      prefill={prefill?.editorKey === editorKey ? prefill : null}
+      activity={
+        scenario && (
+          <WisdomInAction
+            key={scenario.id}
+            scenario={scenario}
+            proverb={proverb}
+            context="study"
+            onRevisitProverb={() => scrollToElement(`proverb-${proverb.id}`, { focus: true })}
+            onReflect={() => setPrefill({ key: 'reflect', text: journalStarter(scenario), nonce: Date.now(), editorKey })}
+          />
+        )
+      }
       intro={
         <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/explore'))} className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted hover:text-forest">
           <ArrowLeft size={16} aria-hidden /> Back
