@@ -1,0 +1,128 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-serif: 'Newsreader Variable', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-cream: #f6f2e9;
+  --color-paper: #fbf9f4;
+  --color-ink: #1d2721;
+  --color-forest: #23382c;
+  --color-forest-soft: #34503f;
+  --color-muted: #59665d;
+  --color-faint: #7d877f;
+  --color-sage: #8fa07c;
+  --color-sage-deep: #5d7150;
+  --color-sage-wash: #e6eadb;
+  --color-line: #e2dccd;
+  --color-line-strong: #cfc7b4;
+  --color-clay: #a4553a;
+
+  --ease-calm: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@layer base {
+  html {
+    background: var(--color-cream);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply font-sans antialiased;
+    min-height: 100dvh;
+  }
+  ::selection {
+    background: var(--color-sage-wash);
+    color: var(--color-forest);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-forest-soft);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  textarea:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline-offset: 0;
+  }
+  [data-reading='large'] {
+    --reading-scale: 1.12;
+  }
+}
+
+/* Base button, declared as a utility so component classes can @apply it. */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ease-calm disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@layer components {
+  .scripture {
+    font-family: var(--font-serif);
+    font-size: calc(1.5rem * var(--reading-scale, 1));
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    font-variation-settings: 'opsz' 36;
+  }
+  @media (min-width: 768px) {
+    .scripture {
+      font-size: calc(1.75rem * var(--reading-scale, 1));
+    }
+  }
+  .prose-body {
+    font-size: calc(1.0625rem * var(--reading-scale, 1));
+    line-height: 1.7;
+  }
+  .eyebrow {
+    @apply text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-sage-deep;
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-paper;
+  }
+  .btn-primary {
+    @apply btn bg-forest text-cream hover:bg-forest-soft;
+  }
+  .btn-quiet {
+    @apply btn border border-line-strong bg-transparent text-forest hover:bg-sage-wash;
+  }
+  .btn-danger {
+    @apply btn bg-clay text-white hover:bg-[#8e4630];
+  }
+  .icon-btn {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-full text-forest transition-colors duration-200 hover:bg-sage-wash;
+  }
+  .field {
+    @apply w-full rounded-xl border border-line bg-paper px-4 py-3 text-ink placeholder:text-faint transition-colors focus:border-sage-deep focus:outline-none;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full border border-line px-3 py-1.5 text-sm text-muted transition-colors hover:border-line-strong hover:text-forest;
+  }
+  .chip[aria-pressed='true'] {
+    @apply border-forest bg-forest text-cream;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 420ms var(--ease-calm) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

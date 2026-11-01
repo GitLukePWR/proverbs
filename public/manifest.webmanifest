@@ -1,0 +1,11 @@
+{
+  "name": "Wize",
+  "short_name": "Wize",
+  "description": "One proverb a day, explained in today's words, with space to reflect.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F6F2E9",
+  "theme_color": "#F6F2E9",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
